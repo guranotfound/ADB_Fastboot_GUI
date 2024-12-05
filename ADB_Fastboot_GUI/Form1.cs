@@ -13,8 +13,14 @@ namespace ADB_Fastboot_GUI
     {
         private Timer clearLogTimer;
 
-        public string AdbPath { get; private set; }
-        public string FastbootPath => System.IO.Path.Combine(ADBBox.Text, "fastboot.exe");
+        private readonly AdbCommandRunner adbCommandRunner;
+        private readonly FastbootCommandRunner fastbootCommandRunner;
+
+        // Add the missing AdbPath field
+        private string AdbPath;
+
+        // Add the missing FastbootPath field
+        private string FastbootPath;
 
         public Form1()
         {
@@ -22,8 +28,9 @@ namespace ADB_Fastboot_GUI
             this.MaximizeBox = false;
             this.AutoScaleMode = AutoScaleMode.None; //Disable Form scaling
 
-            //Disable auto size for materialTabControl1
-            materialTabControl1.AutoSize = false;
+            // Fix the argument types for AdbCommandRunner
+            adbCommandRunner = new AdbCommandRunner("path_to_adb.exe", clearLogTimer, DeviceList as ListBox, APKList as ListBox, ADBLog);
+            fastbootCommandRunner = new FastbootCommandRunner("path_to_fastboot.exe", FastbootList, FastbootLog);
 
             // Initialize the timer
             clearLogTimer = new Timer();
@@ -38,6 +45,9 @@ namespace ADB_Fastboot_GUI
             {
                 AdbPath = System.IO.Path.Combine(ADBBox.Text, "adb.exe");
             }
+
+            // Ensure FastbootPath is initialized
+            FastbootPath = "path_to_fastboot.exe";
         }
 
         private void LoadLastUseddAdbPath()
@@ -226,93 +236,7 @@ namespace ADB_Fastboot_GUI
         //Run ADB Form File Located
         private void RunAdbCommand(string arguments, bool updateAPKList = false, string? filter = null, bool checkForSideload = true)
         {
-            if (System.IO.File.Exists(AdbPath))
-            {
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = AdbPath,
-                    Arguments = arguments,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                using (Process? process = Process.Start(startInfo))
-                {
-                    if (process != null)
-                    {
-                        using (StreamReader reader = process.StandardOutput)
-                        {
-                            string result = reader.ReadToEnd();
-                            ADBLog.Text = result;
-
-                            if (arguments.Contains("devices") && (result.Contains("device") || result.Contains("sideload")))
-                            {
-                                DeviceList.Items.Clear();
-                                string[] lines = result.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                                foreach (string line in lines)
-                                {
-                                    if ((line.Contains("device") || line.Contains("sideload")) && !line.Contains("List of devices attached"))
-                                    {
-                                        string[] parts = line.Split('\t');
-                                        if (parts.Length > 1 && (parts[1] == "device" || parts[1] == "sideload"))
-                                        {
-                                            DeviceList.Items.Add(parts[0]);
-                                        }
-                                    }
-                                }
-
-                                // Auto-select the first device in the list
-                                if (DeviceList.Items.Count > 0)
-                                {
-                                    DeviceList.SelectedIndex = 0;
-                                }
-                            }
-
-                            if (updateAPKList && (filter == null || result.Contains(filter)))
-                            {
-                                APKList.Items.Clear();
-                                string[] lines = result.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                                foreach (string line in lines)
-                                {
-                                    if (line.StartsWith("package:"))
-                                    {
-                                        APKList.Items.Add(line.Substring("package:".Length));
-                                    }
-                                }
-                            }
-
-                            // Check for sideload capability and add serial to DeviceList
-                            if (checkForSideload)
-                            {
-                                string[] lines = result.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                                foreach (string line in lines)
-                                {
-                                    if (line.Contains("device") && line.Contains("sideload"))
-                                    {
-                                        string[] parts = line.Split('\t');
-                                        if (parts.Length > 1 && parts[1] == "device")
-                                        {
-                                            DeviceList.Items.Add(parts[0]);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ADBLog.AppendText("\nError: Process could not be started.");
-                    }
-                }
-
-                // Start the timer to clear the log after 3 seconds
-                clearLogTimer.Start();
-            }
-            else
-            {
-                MessageBox.Show("adb.exe not found in the selected directory.", "Error");
-            }
+            adbCommandRunner.RunAdbCommand(arguments, updateAPKList: true);
         }
 
 
@@ -474,72 +398,7 @@ namespace ADB_Fastboot_GUI
         // Helper method to run fastboot commands and update FastbootLog
         private void RunFastbootCommand(string arguments)
         {
-            if (System.IO.File.Exists(FastbootPath))
-            {
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = FastbootPath,
-                    Arguments = arguments,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                try
-                {
-                    using (Process? process = Process.Start(startInfo))
-                    {
-                        if (process != null)
-                        {
-                            using (StreamReader reader = process.StandardOutput)
-                            {
-                                string result = reader.ReadToEnd();
-                                FastbootLog.AppendText(result);
-
-                                // Parse the output and add serial numbers to FastbootList if "devices" command is run
-                                if (arguments.Contains("devices"))
-                                {
-                                    FastbootList.Items.Clear();
-                                    string[] lines = result.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                                    foreach (string line in lines)
-                                    {
-                                        if (line.Contains("fastboot"))
-                                        {
-                                            string[] parts = line.Split('\t');
-                                            if (parts.Length > 0)
-                                            {
-                                                FastbootList.Items.Add(parts[0]);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            using (StreamReader errorReader = process.StandardError)
-                            {
-                                string errorResult = errorReader.ReadToEnd();
-                                if (!string.IsNullOrEmpty(errorResult))
-                                {
-                                    FastbootLog.AppendText($"\nError: {errorResult}");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            FastbootLog.AppendText("\nError: Process could not be started.");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    FastbootLog.AppendText($"\nException: {ex.Message}");
-                }
-            }
-            else
-            {
-                MessageBox.Show("fastboot.exe not found in the selected directory.", "Error");
-            }
+            fastbootCommandRunner.RunFastbootCommand(arguments);
         }
 
 
@@ -643,5 +502,5 @@ namespace ADB_Fastboot_GUI
             }
         }
     }
-    
+
 }

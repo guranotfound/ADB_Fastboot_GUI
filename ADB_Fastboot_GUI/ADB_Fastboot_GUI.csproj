@@ -46,10 +46,6 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ADB\" />
-  </ItemGroup>
-
   <PropertyGroup>
     <CosturaIncludeAssemblies>$(SolutionDir)**\*.dll</CosturaIncludeAssemblies>
     <CosturaIncludeDebugSymbols>true</CosturaIncludeDebugSymbols>
