@@ -42,7 +42,6 @@
             Uninstall = new ReaLTaiizor.Controls.CrownButton();
             Install = new ReaLTaiizor.Controls.CrownButton();
             APKBox = new ReaLTaiizor.Controls.CrownTextBox();
-            APKList = new CheckedListBox();
             ADBDevice = new ReaLTaiizor.Controls.CrownButton();
             DeviceList = new ReaLTaiizor.Controls.CrownComboBox();
             crownGroupBox2 = new ReaLTaiizor.Controls.CrownGroupBox();
@@ -56,6 +55,7 @@
             crownLabel2 = new ReaLTaiizor.Controls.CrownLabel();
             FileBox = new ReaLTaiizor.Controls.CrownTextBox();
             tabPage2 = new TabPage();
+            crownTitle2 = new ReaLTaiizor.Controls.CrownTitle();
             FastbootReboot = new ReaLTaiizor.Controls.CrownButton();
             FastbootRun = new ReaLTaiizor.Controls.CrownButton();
             crownLabel6 = new ReaLTaiizor.Controls.CrownLabel();
@@ -75,7 +75,7 @@
             ADBButton = new ReaLTaiizor.Controls.CrownButton();
             crownTitle1 = new ReaLTaiizor.Controls.CrownTitle();
             ADBBox = new ReaLTaiizor.Controls.CrownTextBox();
-            crownTitle2 = new ReaLTaiizor.Controls.CrownTitle();
+            APKList = new CheckedListBox();
             nightForm1.SuspendLayout();
             materialTabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -122,9 +122,9 @@
             // 
             // tabPage1
             // 
+            tabPage1.Controls.Add(APKList);
             tabPage1.Controls.Add(ADBLog);
             tabPage1.Controls.Add(crownGroupBox1);
-            tabPage1.Controls.Add(APKList);
             tabPage1.Controls.Add(ADBDevice);
             tabPage1.Controls.Add(DeviceList);
             tabPage1.Controls.Add(crownGroupBox2);
@@ -259,14 +259,6 @@
             APKBox.ReadOnly = true;
             APKBox.Size = new Size(156, 23);
             APKBox.TabIndex = 8;
-            // 
-            // APKList
-            // 
-            APKList.FormattingEnabled = true;
-            APKList.Location = new Point(422, 6);
-            APKList.Name = "APKList";
-            APKList.Size = new Size(348, 184);
-            APKList.TabIndex = 4;
             // 
             // ADBDevice
             // 
@@ -423,6 +415,15 @@
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Fastboot";
             tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // crownTitle2
+            // 
+            crownTitle2.AutoSize = true;
+            crownTitle2.Location = new Point(114, 305);
+            crownTitle2.Name = "crownTitle2";
+            crownTitle2.Size = new Size(314, 15);
+            crownTitle2.TabIndex = 18;
+            crownTitle2.Text = "Caution: Don't Run \"getvar all\". It will make fastboot break";
             // 
             // FastbootReboot
             // 
@@ -629,14 +630,13 @@
             ADBBox.Size = new Size(188, 23);
             ADBBox.TabIndex = 1;
             // 
-            // crownTitle2
+            // APKList
             // 
-            crownTitle2.AutoSize = true;
-            crownTitle2.Location = new Point(114, 305);
-            crownTitle2.Name = "crownTitle2";
-            crownTitle2.Size = new Size(314, 15);
-            crownTitle2.TabIndex = 18;
-            crownTitle2.Text = "Caution: Don't Run \"getvar all\". It will make fastboot break";
+            APKList.FormattingEnabled = true;
+            APKList.Location = new Point(422, 2);
+            APKList.Name = "APKList";
+            APKList.Size = new Size(348, 202);
+            APKList.TabIndex = 9;
             // 
             // Form1
             // 
@@ -685,7 +685,6 @@
         private ReaLTaiizor.Controls.CrownButton Uninstall;
         private ReaLTaiizor.Controls.CrownButton Install;
         private ReaLTaiizor.Controls.CrownTextBox APKBox;
-        private CheckedListBox APKList;
         private ReaLTaiizor.Controls.CrownButton ADBDevice;
         private ReaLTaiizor.Controls.CrownComboBox DeviceList;
         private ReaLTaiizor.Controls.CrownGroupBox crownGroupBox2;
@@ -715,5 +714,6 @@
         private ReaLTaiizor.Controls.CrownTextBox CommandBox;
         private ReaLTaiizor.Controls.CrownButton FastbootReboot;
         private ReaLTaiizor.Controls.CrownTitle crownTitle2;
+        private CheckedListBox APKList;
     }
 }

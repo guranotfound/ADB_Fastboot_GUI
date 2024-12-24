@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReaLTaiizor.Controls;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
@@ -10,11 +11,11 @@ namespace ADB_Fastboot_GUI
     {
         private readonly string adbPath;
         private readonly Timer clearLogTimer;
-        private readonly ListBox deviceList;
-        private readonly ListBox apkList;
+        private readonly CrownComboBox deviceList;
+        private readonly CheckedListBox apkList;
         private readonly TextBox adbLog;
 
-        public AdbCommandRunner(string adbPath, Timer clearLogTimer, ListBox deviceList, ListBox apkList, TextBox adbLog)
+        public AdbCommandRunner(string adbPath, Timer clearLogTimer, CrownComboBox deviceList, CheckedListBox apkList, TextBox adbLog)
         {
             this.adbPath = adbPath;
             this.clearLogTimer = clearLogTimer;

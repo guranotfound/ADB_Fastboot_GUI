@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReaLTaiizor.Controls;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
@@ -8,10 +9,10 @@ namespace ADB_Fastboot_GUI
     public class FastbootCommandRunner
     {
         private readonly string fastbootPath;
-        private readonly ListBox fastbootList;
+        private readonly CrownComboBox fastbootList;
         private readonly TextBox fastbootLog;
 
-        public FastbootCommandRunner(string fastbootPath, ListBox fastbootList, TextBox fastbootLog)
+        public FastbootCommandRunner(string fastbootPath, CrownComboBox fastbootList, TextBox fastbootLog)
         {
             this.fastbootPath = fastbootPath;
             this.fastbootList = fastbootList;

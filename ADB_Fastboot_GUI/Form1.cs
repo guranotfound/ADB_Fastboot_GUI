@@ -1,11 +1,7 @@
-using System.Diagnostics;
-using System;
-using System.Linq;
-using System.Drawing;
-using System.Windows.Forms;
+using ReaLTaiizor.Controls;
 using System.Configuration;
 using Timer = System.Windows.Forms.Timer;
-using ReaLTaiizor.Controls;
+using System.Linq;
 
 namespace ADB_Fastboot_GUI
 {
@@ -28,13 +24,9 @@ namespace ADB_Fastboot_GUI
             this.MaximizeBox = false;
             this.AutoScaleMode = AutoScaleMode.None; //Disable Form scaling
 
-            // Fix the argument types for AdbCommandRunner
-            adbCommandRunner = new AdbCommandRunner("path_to_adb.exe", clearLogTimer, DeviceList as ListBox, APKList as ListBox, ADBLog);
-            fastbootCommandRunner = new FastbootCommandRunner("path_to_fastboot.exe", FastbootList, FastbootLog);
-
             // Initialize the timer
             clearLogTimer = new Timer();
-            clearLogTimer.Interval = 180000; // 3 seconds
+            clearLogTimer.Interval = 180000; // 3 minutes
             clearLogTimer.Tick += ClearLogTimer_Tick;
 
             //Load last ADB path
@@ -48,6 +40,10 @@ namespace ADB_Fastboot_GUI
 
             // Ensure FastbootPath is initialized
             FastbootPath = "path_to_fastboot.exe";
+
+            // Fix the argument types for AdbCommandRunner
+            adbCommandRunner = new AdbCommandRunner(AdbPath, clearLogTimer, DeviceList as CrownComboBox, APKList as CheckedListBox, ADBLog as CrownTextBox);
+            fastbootCommandRunner = new FastbootCommandRunner(FastbootPath, FastbootList as CrownComboBox, FastbootLog as CrownTextBox);
         }
 
         private void LoadLastUseddAdbPath()
@@ -167,10 +163,12 @@ namespace ADB_Fastboot_GUI
         //Uninstall Selected Apps in App List
         private void Uninstall_Click(object sender, EventArgs e)
         {
-            if (DeviceList.SelectedItem != null && APKList.SelectedItems.Count > 0)
+            if (DeviceList.SelectedItem != null && APKList.Items.Count > 0)
             {
                 string selectedDevice = DeviceList.SelectedItem?.ToString() ?? string.Empty;
-                var selectedPackages = APKList.SelectedItems.Cast<string>().ToList();
+                var selectedPackages = APKList.CheckedItems
+                    .Cast<string>()
+                    .ToList();
 
                 var confirmResult = MessageBox.Show(
                     $"Are you sure you want to uninstall the selected packages from {selectedDevice}?",
@@ -501,6 +499,15 @@ namespace ADB_Fastboot_GUI
                 MessageBox.Show("No device selected.", "Error");
             }
         }
-    }
 
+        private void APKList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void APKList_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+    }
 }
