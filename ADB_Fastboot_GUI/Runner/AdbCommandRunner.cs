@@ -114,5 +114,41 @@ namespace ADB_Fastboot_GUI
                 MessageBox.Show("adb.exe not found in the selected directory.", "Error");
             }
         }
+        public async Task<string> RunAdbCommandAsync(string arguments)
+        {
+            if (!File.Exists(adbPath))
+            {
+                return "⚠️ adb.exe không tìm thấy.\n";
+            }
+
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = adbPath,
+                Arguments = arguments,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8,
+                StandardErrorEncoding = System.Text.Encoding.UTF8
+            };
+
+            Process? process = Process.Start(startInfo);
+            if (process == null)
+            {
+                return "⚠️ Lỗi: Không thể khởi động tiến trình.\n";
+            }
+
+            using (process)
+            {
+                string output = await process.StandardOutput.ReadToEndAsync();
+                string errorOutput = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                return string.IsNullOrEmpty(errorOutput) ? output : $"{output}\n❌ Lỗi: {errorOutput}";
+            }
+
+        }
+
     }
 }

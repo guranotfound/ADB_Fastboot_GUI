@@ -10,6 +10,7 @@
     <PackageIcon>NinaSunglasses.png</PackageIcon>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <PublishSingleFile>true</PublishSingleFile>
+    <Configurations>Debug;Release;AIO</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

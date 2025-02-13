@@ -1,7 +1,8 @@
-using ReaLTaiizor.Controls;
+﻿using ReaLTaiizor.Controls;
 using System.Configuration;
 using Timer = System.Windows.Forms.Timer;
 using System.Linq;
+using System.Diagnostics;
 
 namespace ADB_Fastboot_GUI
 {
@@ -21,6 +22,12 @@ namespace ADB_Fastboot_GUI
         public Form1()
         {
             InitializeComponent();
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            if (!Console.IsOutputRedirected)
+            {
+                Console.OutputEncoding = System.Text.Encoding.UTF8;
+            }
+
             this.MaximizeBox = false;
             this.AutoScaleMode = AutoScaleMode.None; //Disable Form scaling
 
@@ -39,11 +46,14 @@ namespace ADB_Fastboot_GUI
             }
 
             // Ensure FastbootPath is initialized
-            FastbootPath = "path_to_fastboot.exe";
+            if (string.IsNullOrEmpty(FastbootPath))
+            {
+                FastbootPath = System.IO.Path.Combine(ADBBox.Text, "fastboot.exe");
+            }
 
             // Fix the argument types for AdbCommandRunner
             adbCommandRunner = new AdbCommandRunner(AdbPath, clearLogTimer, DeviceList as CrownComboBox, APKList as CheckedListBox, ADBLog as CrownTextBox);
-            fastbootCommandRunner = new FastbootCommandRunner(FastbootPath, FastbootList as CrownComboBox, FastbootLog as CrownTextBox);
+            fastbootCommandRunner = new FastbootCommandRunner(FastbootPath, DeviceList as CrownComboBox, FastbootLog as CrownTextBox);
         }
 
         private void LoadLastUseddAdbPath()
@@ -97,6 +107,7 @@ namespace ADB_Fastboot_GUI
                 {
                     ADBBox.Text = fbd.SelectedPath;
                     AdbPath = System.IO.Path.Combine(ADBBox.Text, "adb.exe");
+                    FastbootPath = System.IO.Path.Combine(ADBBox.Text, "fastboot.exe");
                     SaveLastUsedAdbPath(ADBBox.Text);
                 }
             }
@@ -286,24 +297,7 @@ namespace ADB_Fastboot_GUI
         //Run Command Form ShellBox
         private void RunShell_Click(object sender, EventArgs e)
         {
-            if (DeviceList.SelectedItem != null && !string.IsNullOrEmpty(ShellBox.Text))
-            {
-                string selectedDevice = DeviceList.SelectedItem?.ToString() ?? string.Empty;
-                string shellCommand = ShellBox.Text;
-                string arguments = $"-s {selectedDevice}";
 
-                if (ShellCheck.Checked)
-                {
-                    arguments += " shell";
-                }
-
-                arguments += $" {shellCommand}";
-                RunAdbCommand(arguments);
-            }
-            else
-            {
-                MessageBox.Show("No device or command empty.", "Error");
-            }
         }
 
         //Reboot Devices
@@ -361,36 +355,111 @@ namespace ADB_Fastboot_GUI
         // Add this method to handle the FastbootDevice click event
         private void FastbootDevice_Click(object sender, EventArgs e)
         {
-            RunFastbootCommand("devices");
-        }
+            string output = fastbootCommandRunner.RunFastbootCommand("devices");
 
-        // Add this method to handle the Flash click event
-        private void Flash_Click(object sender, EventArgs e)
-        {
-            if (FastbootList.SelectedItem != null && !string.IsNullOrEmpty(PartitionBox.Text) && !string.IsNullOrEmpty(ImageBox.Text))
+            // Ki?m tra n?u output th?c s? có d? li?u
+            if (string.IsNullOrWhiteSpace(output))
             {
-                string selectedDevice = FastbootList.SelectedItem?.ToString() ?? string.Empty;
-                string partition = PartitionBox.Text;
-                string image = ImageBox.Text;
-                string arguments = $"-s {selectedDevice} flash";
+                MessageBox.Show("?? Không tìm th?y thi?t b? ? ch? ?? Fastboot.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
-                if (Verity.Checked)
+            FastbootList.Items.Clear();
+
+            // X? lý output t? fastboot devices
+            string[] lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            bool deviceFound = false;
+
+            foreach (string line in lines)
+            {
+                // Ki?m tra xem dòng có ch?a "fastboot" hay không
+                if (line.Contains("fastboot"))
                 {
-                    arguments += " --disable-verity --disable-verification";
+                    string[] parts = line.Split(new[] { '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length > 1 && parts[1] == "fastboot")
+                    {
+                        FastbootList.Items.Add(parts[0]); // Thêm serial number vào danh sách
+                        deviceFound = true;
+                    }
                 }
+            }
 
-                arguments += $" {partition} {image}";
-
-                // Log the command for debugging
-                FastbootLog.Text = $"Running command: {FastbootPath} {arguments}\n";
-
-                RunFastbootCommand(arguments);
+            if (!deviceFound)
+            {
+                MessageBox.Show("?? Cannot Find Device in Fastboot Mode.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                MessageBox.Show("No device, partition, or image selected.", "Error");
+                FastbootList.SelectedIndex = 0; // Ch?n thi?t b? ??u tiên m?c ??nh
             }
         }
+
+
+        // Add this method to handle the Flash click event
+        private async void Flash_Click(object sender, EventArgs e)
+        {
+            if (FastbootList.SelectedItem == null || PartitionList.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("? Không có thi?t b? ho?c phân vùng nào ???c ch?n.", "L?i", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string selectedDevice = FastbootList.SelectedItem?.ToString() ?? string.Empty;
+            string fastbootPath = System.IO.Path.Combine(ADBBox.Text, "fastboot.exe");
+            bool isABChecked = ABCheck.Checked;
+            string firmwareDir = FirmwareBox.Text;
+
+            List<string> flashedFiles = new List<string>();
+
+            foreach (var selectedItem in PartitionList.SelectedItems)
+            {
+                string partitionName = selectedItem.ToString() ?? string.Empty;
+                string baseFileName = isABChecked ? partitionName + "_ab" : partitionName;
+
+                // Tìm file th?c t? trong th? m?c firmware (.img ho?c .bin)
+                string? imagePath = Directory.GetFiles(firmwareDir)
+                    .FirstOrDefault(file => Path.GetFileNameWithoutExtension(file) == baseFileName);
+
+                if (imagePath == null && isABChecked)
+                {
+                    imagePath = Directory.GetFiles(firmwareDir)
+                        .FirstOrDefault(file => Path.GetFileNameWithoutExtension(file) == partitionName);
+                }
+
+                if (imagePath == null)
+                {
+                    FastbootLog.AppendText($"? Không tìm th?y file cho phân vùng: {baseFileName} (.img ho?c .bin)\n");
+                    continue;
+                }
+
+                // Ki?m tra n?u file này ?ã ???c flash tr??c ?ó (tránh flash trùng)
+                if (flashedFiles.Contains(imagePath))
+                {
+                    FastbootLog.AppendText($"?? B? qua: {baseFileName} ?ã ???c flash tr??c ?ó.\n");
+                    continue;
+                }
+
+                // T?o l?nh fastboot flash
+                string arguments = $"-s {selectedDevice} flash {partitionName} \"{imagePath}\"";
+
+                // Ghi log tr??c khi ch?y l?nh
+                FastbootLog.AppendText($"?? Ch?y l?nh: {fastbootPath} {arguments}\n");
+
+                // Ch?y l?nh flash và ghi l?i toàn b? output
+                string output = await fastbootCommandRunner.RunFastbootCommandAsync(arguments);
+                FastbootLog.AppendText(output + "\n");
+
+                // Thêm file ?ã flash vào danh sách
+                flashedFiles.Add(imagePath);
+            }
+
+            FastbootLog.AppendText("\n? Hoàn t?t flash t?t c? các file!\n");
+        }
+
+
+
+
 
 
         // Helper method to run fastboot commands and update FastbootLog
@@ -402,14 +471,7 @@ namespace ADB_Fastboot_GUI
 
         private void SelectImage_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog ofd = new OpenFileDialog())
-            {
-                ofd.Filter = "All files (*.*)|*.*";
-                if (ofd.ShowDialog() == DialogResult.OK)
-                {
-                    ImageBox.Text = ofd.FileName;
-                }
-            }
+
         }
 
         private void Format_Click(object sender, EventArgs e)
@@ -509,5 +571,169 @@ namespace ADB_Fastboot_GUI
         {
 
         }
+
+        private void Verity_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void crownGroupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Firmware_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+            {
+                if (fbd.ShowDialog() == DialogResult.OK)
+                {
+                    string selectedPath = fbd.SelectedPath;
+
+                    // Handle the selected folder path
+                    FirmwareBox.Text = selectedPath;
+
+                    // Clear the existing items in PartitionList
+                    PartitionList.Items.Clear();
+
+                    // Get all .img and .bin files in the selected folder
+                    string[] imgFiles = System.IO.Directory.GetFiles(selectedPath, "*.img");
+                    string[] binFiles = System.IO.Directory.GetFiles(selectedPath, "*.bin");
+
+                    // Add each file to PartitionList
+                    foreach (string file in imgFiles.Concat(binFiles))
+                    {
+                        PartitionList.Items.Add(System.IO.Path.GetFileNameWithoutExtension(file));
+                    }
+                }
+            }
+
+        }
+
+        private void FastbootLog_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private async void Unlock_Click(object sender, EventArgs e)
+        {
+            if (FastbootList.SelectedItem == null)
+            {
+                MessageBox.Show("? Not device Selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string selectedDevice = FastbootList.SelectedItem?.ToString() ?? string.Empty;
+
+            // H?p tho?i c?nh báo
+            DialogResult result = MessageBox.Show(
+                "?? Warning: Unlocking the Bootloader may erase all data on the device and may void the warranty.\n\nAre you sure you want to continue?",
+                "Confirm Unlock Bootloader",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.No)
+            {
+                FastbootLog.AppendText("? Cancel Unlock Bootloader.\n");
+                return;
+            }
+
+            string fastbootPath = System.IO.Path.Combine(ADBBox.Text, "fastboot.exe");
+            string arguments = $"-s {selectedDevice} flashing unlock";
+
+            // Ghi log tr??c khi ch?y l?nh
+            FastbootLog.AppendText($"?? Running Command: {fastbootPath} {arguments}\n");
+
+            // Ch?y l?nh Unlock và ghi l?i output
+            string output = await fastbootCommandRunner.RunFastbootCommandAsync(arguments);
+            FastbootLog.AppendText(output + "\n");
+
+            FastbootLog.AppendText("\n? Complete Unlock Bootloader!\n");
+        }
+
+        private async void Lock_Click(object sender, EventArgs e)
+        {
+            if (FastbootList.SelectedItem == null)
+            {
+                MessageBox.Show("? Not device Selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string selectedDevice = FastbootList.SelectedItem?.ToString() ?? string.Empty;
+
+            // H?p tho?i c?nh báo
+            DialogResult result = MessageBox.Show(
+                "?? Warning: Relocking the Bootloader will block the ability to install custom software.\n" +
+                "If the device is running unofficial firmware, re-locking the Bootloader may cause errors (soft brick).\n\n" +
+                "Are you sure you want to continue?",
+                "Confirm Lock Bootloader",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.No)
+            {
+                FastbootLog.AppendText("? Cancel Lock Bootloader.\n");
+                return;
+            }
+
+            string fastbootPath = System.IO.Path.Combine(ADBBox.Text, "fastboot.exe");
+            string arguments = $"-s {selectedDevice} flashing lock";
+
+            // Ghi log tr??c khi ch?y l?nh
+            FastbootLog.AppendText($"?? Running Command: {fastbootPath} {arguments}\n");
+
+            // Ch?y l?nh Lock và ghi l?i output
+            string output = await fastbootCommandRunner.RunFastbootCommandAsync(arguments);
+            FastbootLog.AppendText(output + "\n");
+
+            FastbootLog.AppendText("\n? Complete Lock Bootloader!\n");
+        }
+
+        private async void Shell_Click(object sender, EventArgs e)
+        {
+            if (DeviceList.SelectedItem == null)
+            {
+                MessageBox.Show("❌ Không có thiết bị nào được chọn.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string selectedDevice = DeviceList.SelectedItem?.ToString() ?? string.Empty;
+            string adbPath = Path.Combine(ADBBox.Text, "adb.exe");
+
+            if (!File.Exists(adbPath))
+            {
+                MessageBox.Show($"⚠️ Không tìm thấy adb.exe tại {adbPath}.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Nếu SUCheck được tick, kiểm tra xem thiết bị có quyền Superuser không
+            if (SUCheck.Checked)
+            {
+                string suCheckCommand = $"-s {selectedDevice} shell su -c \"whoami\"";
+                string output = await adbCommandRunner.RunAdbCommandAsync(suCheckCommand);
+
+                if (!output.Trim().Equals("root", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show("❌ Shell trên thiết bị chưa được cấp quyền Superuser.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            // Nếu SUCheck được tick, chạy shell với quyền Superuser
+            string adbShellCommand = SUCheck.Checked ? "su" : "";
+            string command = $"\"{adbPath}\" -s {selectedDevice} shell {adbShellCommand}";
+
+            // Mở cửa sổ CMD và chạy lệnh
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/k {command}",  // /k: Giữ cửa sổ CMD mở sau khi chạy lệnh
+                WorkingDirectory = Path.GetDirectoryName(adbPath), // Đặt thư mục làm việc
+                UseShellExecute = true // Mở CMD bên ngoài thay vì trong tiến trình ẩn
+            };
+
+            Process.Start(startInfo);
+        }
+
     }
 }

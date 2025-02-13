@@ -31,9 +31,9 @@
             nightForm1 = new ReaLTaiizor.Forms.NightForm();
             materialTabControl1 = new ReaLTaiizor.Controls.MaterialShowTabControl();
             tabPage1 = new TabPage();
+            APKList = new CheckedListBox();
             ADBLog = new ReaLTaiizor.Controls.CrownTextBox();
             crownGroupBox1 = new ReaLTaiizor.Controls.CrownGroupBox();
-            Reinstall = new ReaLTaiizor.Controls.CrownCheckBox();
             SystemAPK = new ReaLTaiizor.Controls.CrownButton();
             SelectAPK = new ReaLTaiizor.Controls.CrownButton();
             Downgrade = new ReaLTaiizor.Controls.CrownCheckBox();
@@ -45,8 +45,8 @@
             ADBDevice = new ReaLTaiizor.Controls.CrownButton();
             DeviceList = new ReaLTaiizor.Controls.CrownComboBox();
             crownGroupBox2 = new ReaLTaiizor.Controls.CrownGroupBox();
+            Shell = new ReaLTaiizor.Controls.CrownButton();
             Reboot = new ReaLTaiizor.Controls.CrownButton();
-            ShellCheck = new ReaLTaiizor.Controls.CrownCheckBox();
             crownLabel3 = new ReaLTaiizor.Controls.CrownLabel();
             ShellBox = new ReaLTaiizor.Controls.CrownTextBox();
             RunShell = new ReaLTaiizor.Controls.CrownButton();
@@ -55,6 +55,13 @@
             crownLabel2 = new ReaLTaiizor.Controls.CrownLabel();
             FileBox = new ReaLTaiizor.Controls.CrownTextBox();
             tabPage2 = new TabPage();
+            ABCheck = new ReaLTaiizor.Controls.CrownCheckBox();
+            Firmware = new ReaLTaiizor.Controls.CrownButton();
+            crownLabel4 = new ReaLTaiizor.Controls.CrownLabel();
+            Lock = new ReaLTaiizor.Controls.CrownButton();
+            Unlock = new ReaLTaiizor.Controls.CrownButton();
+            FirmwareBox = new ReaLTaiizor.Controls.CrownTextBox();
+            PartitionList = new CheckedListBox();
             crownTitle2 = new ReaLTaiizor.Controls.CrownTitle();
             FastbootReboot = new ReaLTaiizor.Controls.CrownButton();
             FastbootRun = new ReaLTaiizor.Controls.CrownButton();
@@ -62,12 +69,6 @@
             CommandBox = new ReaLTaiizor.Controls.CrownTextBox();
             Format = new ReaLTaiizor.Controls.CrownButton();
             FastbootList = new ReaLTaiizor.Controls.CrownComboBox();
-            Verity = new ReaLTaiizor.Controls.CrownCheckBox();
-            SelectImage = new ReaLTaiizor.Controls.CrownButton();
-            crownLabel5 = new ReaLTaiizor.Controls.CrownLabel();
-            ImageBox = new ReaLTaiizor.Controls.CrownTextBox();
-            crownLabel4 = new ReaLTaiizor.Controls.CrownLabel();
-            PartitionBox = new ReaLTaiizor.Controls.CrownTextBox();
             Flash = new ReaLTaiizor.Controls.CrownButton();
             FastbootLog = new ReaLTaiizor.Controls.CrownTextBox();
             FastbootDevice = new ReaLTaiizor.Controls.CrownButton();
@@ -75,7 +76,8 @@
             ADBButton = new ReaLTaiizor.Controls.CrownButton();
             crownTitle1 = new ReaLTaiizor.Controls.CrownTitle();
             ADBBox = new ReaLTaiizor.Controls.CrownTextBox();
-            APKList = new CheckedListBox();
+            Reinstall = new ReaLTaiizor.Controls.CrownCheckBox();
+            SUCheck = new ReaLTaiizor.Controls.CrownCheckBox();
             nightForm1.SuspendLayout();
             materialTabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -128,13 +130,21 @@
             tabPage1.Controls.Add(ADBDevice);
             tabPage1.Controls.Add(DeviceList);
             tabPage1.Controls.Add(crownGroupBox2);
-            tabPage1.Location = new Point(4, 24);
+            tabPage1.Location = new Point(4, 25);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(776, 342);
+            tabPage1.Size = new Size(776, 341);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "ADB";
             tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // APKList
+            // 
+            APKList.FormattingEnabled = true;
+            APKList.Location = new Point(422, 2);
+            APKList.Name = "APKList";
+            APKList.Size = new Size(348, 202);
+            APKList.TabIndex = 9;
             // 
             // ADBLog
             // 
@@ -151,7 +161,7 @@
             // 
             // crownGroupBox1
             // 
-            crownGroupBox1.BackColor = Color.White;
+            crownGroupBox1.BackColor = SystemColors.Control;
             crownGroupBox1.BorderColor = Color.FromArgb(64, 64, 64);
             crownGroupBox1.Controls.Add(Reinstall);
             crownGroupBox1.Controls.Add(SystemAPK);
@@ -163,22 +173,14 @@
             crownGroupBox1.Controls.Add(Install);
             crownGroupBox1.Controls.Add(APKBox);
             crownGroupBox1.FlatStyle = FlatStyle.System;
+            crownGroupBox1.ForeColor = SystemColors.ButtonHighlight;
             crownGroupBox1.Location = new Point(6, 27);
             crownGroupBox1.Name = "crownGroupBox1";
             crownGroupBox1.Size = new Size(402, 136);
             crownGroupBox1.TabIndex = 7;
             crownGroupBox1.TabStop = false;
             crownGroupBox1.Text = "Android Apps";
-            // 
-            // Reinstall
-            // 
-            Reinstall.AutoSize = true;
-            Reinstall.BackColor = Color.Transparent;
-            Reinstall.Location = new Point(120, 94);
-            Reinstall.Name = "Reinstall";
-            Reinstall.Size = new Size(70, 19);
-            Reinstall.TabIndex = 14;
-            Reinstall.Text = "Reinstall";
+            crownGroupBox1.Enter += crownGroupBox1_Enter;
             // 
             // SystemAPK
             // 
@@ -222,7 +224,7 @@
             // crownLabel1
             // 
             crownLabel1.AutoSize = true;
-            crownLabel1.ForeColor = Color.Black;
+            crownLabel1.ForeColor = Color.White;
             crownLabel1.Location = new Point(6, 48);
             crownLabel1.Name = "crownLabel1";
             crownLabel1.Size = new Size(67, 15);
@@ -283,8 +285,9 @@
             // crownGroupBox2
             // 
             crownGroupBox2.BorderColor = Color.FromArgb(51, 51, 51);
+            crownGroupBox2.Controls.Add(SUCheck);
+            crownGroupBox2.Controls.Add(Shell);
             crownGroupBox2.Controls.Add(Reboot);
-            crownGroupBox2.Controls.Add(ShellCheck);
             crownGroupBox2.Controls.Add(crownLabel3);
             crownGroupBox2.Controls.Add(ShellBox);
             crownGroupBox2.Controls.Add(RunShell);
@@ -300,6 +303,16 @@
             crownGroupBox2.TabStop = false;
             crownGroupBox2.Text = "ETC";
             // 
+            // Shell
+            // 
+            Shell.Location = new Point(149, 140);
+            Shell.Name = "Shell";
+            Shell.Padding = new Padding(5);
+            Shell.Size = new Size(92, 23);
+            Shell.TabIndex = 17;
+            Shell.Text = "Shell";
+            Shell.Click += Shell_Click;
+            // 
             // Reboot
             // 
             Reboot.Location = new Point(6, 140);
@@ -310,19 +323,10 @@
             Reboot.Text = "Reboot";
             Reboot.Click += Reboot_Click;
             // 
-            // ShellCheck
-            // 
-            ShellCheck.AutoSize = true;
-            ShellCheck.Location = new Point(235, 140);
-            ShellCheck.Name = "ShellCheck";
-            ShellCheck.Size = new Size(111, 19);
-            ShellCheck.TabIndex = 17;
-            ShellCheck.Text = "Shell Command";
-            // 
             // crownLabel3
             // 
             crownLabel3.AutoSize = true;
-            crownLabel3.ForeColor = Color.Black;
+            crownLabel3.ForeColor = Color.White;
             crownLabel3.Location = new Point(6, 73);
             crownLabel3.Name = "crownLabel3";
             crownLabel3.Size = new Size(90, 15);
@@ -373,7 +377,7 @@
             // crownLabel2
             // 
             crownLabel2.AutoSize = true;
-            crownLabel2.ForeColor = Color.Black;
+            crownLabel2.ForeColor = Color.White;
             crownLabel2.Location = new Point(6, 19);
             crownLabel2.Name = "crownLabel2";
             crownLabel2.Size = new Size(111, 15);
@@ -392,6 +396,13 @@
             // 
             // tabPage2
             // 
+            tabPage2.Controls.Add(ABCheck);
+            tabPage2.Controls.Add(Firmware);
+            tabPage2.Controls.Add(crownLabel4);
+            tabPage2.Controls.Add(Lock);
+            tabPage2.Controls.Add(Unlock);
+            tabPage2.Controls.Add(FirmwareBox);
+            tabPage2.Controls.Add(PartitionList);
             tabPage2.Controls.Add(crownTitle2);
             tabPage2.Controls.Add(FastbootReboot);
             tabPage2.Controls.Add(FastbootRun);
@@ -399,22 +410,83 @@
             tabPage2.Controls.Add(CommandBox);
             tabPage2.Controls.Add(Format);
             tabPage2.Controls.Add(FastbootList);
-            tabPage2.Controls.Add(Verity);
-            tabPage2.Controls.Add(SelectImage);
-            tabPage2.Controls.Add(crownLabel5);
-            tabPage2.Controls.Add(ImageBox);
-            tabPage2.Controls.Add(crownLabel4);
-            tabPage2.Controls.Add(PartitionBox);
             tabPage2.Controls.Add(Flash);
             tabPage2.Controls.Add(FastbootLog);
             tabPage2.Controls.Add(FastbootDevice);
-            tabPage2.Location = new Point(4, 24);
+            tabPage2.Location = new Point(4, 25);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(776, 342);
+            tabPage2.Size = new Size(776, 341);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Fastboot";
             tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // ABCheck
+            // 
+            ABCheck.AutoSize = true;
+            ABCheck.Location = new Point(114, 121);
+            ABCheck.Name = "ABCheck";
+            ABCheck.Size = new Size(46, 19);
+            ABCheck.TabIndex = 25;
+            ABCheck.Text = "A/B";
+            // 
+            // Firmware
+            // 
+            Firmware.Location = new Point(200, 74);
+            Firmware.Name = "Firmware";
+            Firmware.Padding = new Padding(5);
+            Firmware.Size = new Size(84, 23);
+            Firmware.TabIndex = 24;
+            Firmware.Text = "Folder";
+            Firmware.Click += Firmware_Click;
+            // 
+            // crownLabel4
+            // 
+            crownLabel4.AutoSize = true;
+            crownLabel4.ForeColor = Color.White;
+            crownLabel4.Location = new Point(7, 56);
+            crownLabel4.Name = "crownLabel4";
+            crownLabel4.Size = new Size(94, 15);
+            crownLabel4.TabIndex = 23;
+            crownLabel4.Text = "Firmware Locate";
+            // 
+            // Lock
+            // 
+            Lock.Location = new Point(234, 164);
+            Lock.Name = "Lock";
+            Lock.Padding = new Padding(5);
+            Lock.Size = new Size(84, 23);
+            Lock.TabIndex = 22;
+            Lock.Text = "Lock";
+            Lock.Click += Lock_Click;
+            // 
+            // Unlock
+            // 
+            Unlock.Location = new Point(131, 164);
+            Unlock.Name = "Unlock";
+            Unlock.Padding = new Padding(5);
+            Unlock.Size = new Size(79, 23);
+            Unlock.TabIndex = 21;
+            Unlock.Text = "Unlock";
+            Unlock.Click += Unlock_Click;
+            // 
+            // FirmwareBox
+            // 
+            FirmwareBox.BackColor = Color.FromArgb(69, 73, 74);
+            FirmwareBox.BorderStyle = BorderStyle.FixedSingle;
+            FirmwareBox.ForeColor = Color.FromArgb(220, 220, 220);
+            FirmwareBox.Location = new Point(6, 74);
+            FirmwareBox.Name = "FirmwareBox";
+            FirmwareBox.Size = new Size(172, 23);
+            FirmwareBox.TabIndex = 20;
+            // 
+            // PartitionList
+            // 
+            PartitionList.FormattingEnabled = true;
+            PartitionList.Location = new Point(435, 6);
+            PartitionList.Name = "PartitionList";
+            PartitionList.Size = new Size(335, 148);
+            PartitionList.TabIndex = 19;
             // 
             // crownTitle2
             // 
@@ -448,7 +520,7 @@
             // crownLabel6
             // 
             crownLabel6.AutoSize = true;
-            crownLabel6.ForeColor = Color.Black;
+            crownLabel6.ForeColor = Color.White;
             crownLabel6.Location = new Point(7, 211);
             crownLabel6.Name = "crownLabel6";
             crownLabel6.Size = new Size(64, 15);
@@ -484,66 +556,6 @@
             FastbootList.Size = new Size(121, 24);
             FastbootList.TabIndex = 12;
             // 
-            // Verity
-            // 
-            Verity.AutoSize = true;
-            Verity.Location = new Point(114, 122);
-            Verity.Name = "Verity";
-            Verity.Size = new Size(96, 19);
-            Verity.TabIndex = 9;
-            Verity.Text = "Disable Verity";
-            // 
-            // SelectImage
-            // 
-            SelectImage.Location = new Point(266, 75);
-            SelectImage.Name = "SelectImage";
-            SelectImage.Padding = new Padding(5);
-            SelectImage.Size = new Size(87, 23);
-            SelectImage.TabIndex = 8;
-            SelectImage.Text = "Select Image";
-            SelectImage.Click += SelectImage_Click;
-            // 
-            // crownLabel5
-            // 
-            crownLabel5.AutoSize = true;
-            crownLabel5.ForeColor = Color.Black;
-            crownLabel5.Location = new Point(119, 57);
-            crownLabel5.Name = "crownLabel5";
-            crownLabel5.Size = new Size(61, 15);
-            crownLabel5.TabIndex = 7;
-            crownLabel5.Text = "Image File";
-            // 
-            // ImageBox
-            // 
-            ImageBox.BackColor = Color.FromArgb(69, 73, 74);
-            ImageBox.BorderStyle = BorderStyle.FixedSingle;
-            ImageBox.ForeColor = Color.FromArgb(220, 220, 220);
-            ImageBox.Location = new Point(119, 75);
-            ImageBox.Name = "ImageBox";
-            ImageBox.ReadOnly = true;
-            ImageBox.Size = new Size(133, 23);
-            ImageBox.TabIndex = 6;
-            // 
-            // crownLabel4
-            // 
-            crownLabel4.AutoSize = true;
-            crownLabel4.ForeColor = Color.Black;
-            crownLabel4.Location = new Point(6, 57);
-            crownLabel4.Name = "crownLabel4";
-            crownLabel4.Size = new Size(52, 15);
-            crownLabel4.TabIndex = 5;
-            crownLabel4.Text = "Partition";
-            // 
-            // PartitionBox
-            // 
-            PartitionBox.BackColor = Color.FromArgb(69, 73, 74);
-            PartitionBox.BorderStyle = BorderStyle.FixedSingle;
-            PartitionBox.ForeColor = Color.FromArgb(220, 220, 220);
-            PartitionBox.Location = new Point(6, 75);
-            PartitionBox.Name = "PartitionBox";
-            PartitionBox.Size = new Size(97, 23);
-            PartitionBox.TabIndex = 4;
-            // 
             // Flash
             // 
             Flash.Location = new Point(6, 118);
@@ -559,13 +571,14 @@
             FastbootLog.BackColor = Color.FromArgb(69, 73, 74);
             FastbootLog.BorderStyle = BorderStyle.FixedSingle;
             FastbootLog.ForeColor = Color.FromArgb(220, 220, 220);
-            FastbootLog.Location = new Point(435, 6);
+            FastbootLog.Location = new Point(435, 164);
             FastbootLog.MaxLength = 1111111111;
             FastbootLog.Multiline = true;
             FastbootLog.Name = "FastbootLog";
             FastbootLog.ReadOnly = true;
-            FastbootLog.Size = new Size(335, 330);
+            FastbootLog.Size = new Size(335, 172);
             FastbootLog.TabIndex = 2;
+            FastbootLog.TextChanged += FastbootLog_TextChanged;
             // 
             // FastbootDevice
             // 
@@ -630,13 +643,25 @@
             ADBBox.Size = new Size(188, 23);
             ADBBox.TabIndex = 1;
             // 
-            // APKList
+            // Reinstall
             // 
-            APKList.FormattingEnabled = true;
-            APKList.Location = new Point(422, 2);
-            APKList.Name = "APKList";
-            APKList.Size = new Size(348, 202);
-            APKList.TabIndex = 9;
+            Reinstall.AutoSize = true;
+            Reinstall.BackColor = Color.Transparent;
+            Reinstall.Location = new Point(120, 94);
+            Reinstall.Name = "Reinstall";
+            Reinstall.Size = new Size(70, 19);
+            Reinstall.TabIndex = 14;
+            Reinstall.Text = "Reinstall";
+            // 
+            // SUCheck
+            // 
+            SUCheck.AutoSize = true;
+            SUCheck.BackColor = Color.Transparent;
+            SUCheck.Location = new Point(259, 143);
+            SUCheck.Name = "SUCheck";
+            SUCheck.Size = new Size(78, 19);
+            SUCheck.TabIndex = 18;
+            SUCheck.Text = "Superuser";
             // 
             // Form1
             // 
@@ -676,7 +701,6 @@
         private TabPage tabPage1;
         private ReaLTaiizor.Controls.CrownTextBox ADBLog;
         private ReaLTaiizor.Controls.CrownGroupBox crownGroupBox1;
-        private ReaLTaiizor.Controls.CrownCheckBox Reinstall;
         private ReaLTaiizor.Controls.CrownButton SystemAPK;
         private ReaLTaiizor.Controls.CrownButton SelectAPK;
         private ReaLTaiizor.Controls.CrownCheckBox Downgrade;
@@ -689,7 +713,6 @@
         private ReaLTaiizor.Controls.CrownComboBox DeviceList;
         private ReaLTaiizor.Controls.CrownGroupBox crownGroupBox2;
         private ReaLTaiizor.Controls.CrownButton Reboot;
-        private ReaLTaiizor.Controls.CrownCheckBox ShellCheck;
         private ReaLTaiizor.Controls.CrownLabel crownLabel3;
         private ReaLTaiizor.Controls.CrownTextBox ShellBox;
         private ReaLTaiizor.Controls.CrownButton RunShell;
@@ -700,12 +723,6 @@
         private TabPage tabPage2;
         private ReaLTaiizor.Controls.CrownButton FastbootDevice;
         private ReaLTaiizor.Controls.CrownTextBox FastbootLog;
-        private ReaLTaiizor.Controls.CrownCheckBox Verity;
-        private ReaLTaiizor.Controls.CrownButton SelectImage;
-        private ReaLTaiizor.Controls.CrownLabel crownLabel5;
-        private ReaLTaiizor.Controls.CrownTextBox ImageBox;
-        private ReaLTaiizor.Controls.CrownLabel crownLabel4;
-        private ReaLTaiizor.Controls.CrownTextBox PartitionBox;
         private ReaLTaiizor.Controls.CrownButton Flash;
         private ReaLTaiizor.Controls.CrownComboBox FastbootList;
         private ReaLTaiizor.Controls.CrownButton Format;
@@ -715,5 +732,15 @@
         private ReaLTaiizor.Controls.CrownButton FastbootReboot;
         private ReaLTaiizor.Controls.CrownTitle crownTitle2;
         private CheckedListBox APKList;
+        private CheckedListBox PartitionList;
+        private ReaLTaiizor.Controls.CrownTextBox FirmwareBox;
+        private ReaLTaiizor.Controls.CrownButton Unlock;
+        private ReaLTaiizor.Controls.CrownButton Lock;
+        private ReaLTaiizor.Controls.CrownButton Firmware;
+        private ReaLTaiizor.Controls.CrownLabel crownLabel4;
+        private ReaLTaiizor.Controls.CrownCheckBox ABCheck;
+        private ReaLTaiizor.Controls.CrownButton Shell;
+        private ReaLTaiizor.Controls.CrownCheckBox Reinstall;
+        private ReaLTaiizor.Controls.CrownCheckBox SUCheck;
     }
 }
